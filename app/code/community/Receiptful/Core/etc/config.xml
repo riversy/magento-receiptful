@@ -32,5 +32,16 @@
                 </admin>
             </resources>
         </acl>
+        <events>
+            <sales_order_invoice_pay>
+                <observers>
+                    <Receiptful_Core_Create_Receipt>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Model_Observer</class>
+                        <method>createReceipt</method>
+                    </Receiptful_Core_Create_Receipt>
+                </observers>
+            </sales_order_invoice_pay>
+        </events>
     </adminhtml>
 </config>
