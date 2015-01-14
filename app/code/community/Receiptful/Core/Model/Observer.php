@@ -25,6 +25,8 @@ class Receiptful_Core_Model_Observer
         try {
             $result = $this->sendRequest($data, $apiKey);
 
+            $invoice->setReceiptfulId($result['_id']);
+
             $order->addStatusToHistory(
                 $order->getStatus(),
                 'Receiptful receipt sent correclty.',
@@ -158,7 +160,7 @@ class Receiptful_Core_Model_Observer
         curl_close($ch);
 
         if (201 === $httpCode) {
-            return ;
+            return json_decode($result, true);
         }
 
         if (400 === $httpCode) {
