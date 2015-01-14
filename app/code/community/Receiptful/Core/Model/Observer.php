@@ -14,6 +14,9 @@ class Receiptful_Core_Model_Observer
             return;
         }
 
+        // This should override email sending but not persisting it
+        Mage::app()->getStore()->setConfig(Mage_Sales_Model_Order::XML_PATH_EMAIL_ENABLED, '0');
+
         $invoice = $observer->getEvent()->getInvoice();
         $order = $invoice->getOrder();
 
