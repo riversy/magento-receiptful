@@ -11,6 +11,13 @@
                 <class>Receiptful_Core_Helper</class>
             </receiptful>
         </helpers>
+        <blocks>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_invoice_view>Receiptful_Core_Block_Sales_Order_Invoice_View</sales_order_invoice_view>
+                </rewrite>
+            </adminhtml>
+        </blocks>
     </global>
     <adminhtml>
         <acl>
