@@ -1,0 +1,1 @@
+## Receiptful Magento extension
