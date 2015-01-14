@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Receiptful_Core>
+            <version>0.0.1</version>
+        </Receiptful_Core>
+    </modules>
+    <global>
+        <helpers>
+            <receiptful>
+                <class>Receiptful_Core_Helper</class>
+            </receiptful>
+        </helpers>
+    </global>
+    <adminhtml>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <receiptful>
+                                            <title>Store Receiptful Module Section</title>
+                                        </receiptful>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+    </adminhtml>
+</config>
