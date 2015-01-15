@@ -1,10 +1,21 @@
 <?php
-class Receiptful_Core_Model_Observer
+/**
+ * This file is part of the Receiptful extension.
+ *
+ * (c) Receiptful <info@receiptful.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author Stefano Sala <stefano@receiptful.com>
+ */
+class Receiptful_Core_Observer_Receipt
 {
-    const RECEIPTFUL_API_KEY_CONFIGURATION = 'receiptful/configuration/api_key';
-
-    const RECEIPTFUL_URL = 'http://localhost:9000/api/v1';
-
+    /**
+     * Create a Receipt in Receiptful
+     *
+     * @param  Varien_Event_Observer $observer
+     */
     public function createReceipt(Varien_Event_Observer $observer)
     {
         // This should override email sending but not persisting it
@@ -16,7 +27,7 @@ class Receiptful_Core_Model_Observer
         $data = $this->transformInvoiceToReceipt($invoice);
 
         try {
-            $result = static::sendRequest($data, '/receipts');
+            $result = Receiptful_Core_ApiClient::sendRequest($data, '/receipts');
 
             $this->handleUpsellResponse($result);
 
@@ -33,6 +44,78 @@ class Receiptful_Core_Model_Observer
                 'Receiptful failed to send receipt: ' . $e->getMessage(),
                 false
             );
+        }
+    }
+
+    /**
+     * Add a custom resend button to Invoice view
+     *
+     * @param mixed $observer
+     */
+    public function addCustomResendButton($observer)
+    {
+        $block = $observer->getEvent()->getBlock();
+
+        if (
+            $block instanceof Mage_Adminhtml_Block_Sales_Order_Invoice_View &&
+            'sales_order_invoice' === $block->getRequest()->getControllerName()
+        ) {
+            $block->removeButton('send_notification');
+
+            $invoice = Mage::registry('current_invoice');
+
+            $receiptId = $invoice->getReceiptfulId();
+
+            // If we don't have a receiptful id, stick to default send functionality
+            if (!$receiptId) {
+                return;
+            }
+
+            $resendUrl = Mage::helper('adminhtml')
+                ->getUrl(
+                    'adminhtml/receipt/resend',
+                    array(
+                        'order_id'  => $invoice->getOrder()->getId(),
+                        'invoice_id'=> $invoice->getId(),
+                    )
+                );
+
+            $block->addButton('send_notification', array(
+                'label'     => Mage::helper('sales')->__('Send Email'),
+                'onclick'   => 'confirmSetLocation(\''
+                . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
+                . '\', \'' . $resendUrl . '\')'
+            ));
+        }
+    }
+
+    /**
+     * Add a custom view receipt button to Invoice view
+     *
+     * @param mixed $observer
+     */
+    public function addViewReceiptButton($observer)
+    {
+        $block = $observer->getEvent()->getBlock();
+
+        if (
+            $block instanceof Mage_Adminhtml_Block_Sales_Order_Invoice_View &&
+            'sales_order_invoice' === $block->getRequest()->getControllerName()
+        ) {
+            $invoice = Mage::registry('current_invoice');
+
+            $receiptId = $invoice->getReceiptfulId();
+
+            if (!$receiptId) {
+                return;
+            }
+
+            $receiptUrl = 'https://app.receiptful.com/receipt/' . $receiptId;
+
+            $block->addButton('view_receipt', array(
+                'label'     => Mage::helper('sales')->__('View Receipt'),
+                'onclick'   => 'popWin(\''.$receiptUrl.'\', \'_blank\')'
+            ));
         }
     }
 
@@ -150,13 +233,13 @@ class Receiptful_Core_Model_Observer
         if ($amount = $invoice->getDiscountAmount()) {
             $data['subtotals'][] = array(
                 'description' => $invoice->getDiscountDescription(),
-                'amount' => $amount * -1
+                'amount' => $amount
             );
         }
 
         if ($amount = $invoice->getTaxAmount()) {
             $data['subtotals'][] = array(
-                'description' => 'Tax', // @TODO i18n
+                'description' => Mage::helper('sales')->__('Tax'),
                 'amount' => $amount
             );
         }
@@ -212,112 +295,5 @@ class Receiptful_Core_Model_Observer
         }
 
         return $data;
-    }
-
-    public static function sendRequest(array $data, $url)
-    {
-        $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
-
-        // If the module has not been configured yet, skip everything
-        if (!$apiKey) {
-            throw new Receiptful_Core_Exception_FailedRequestException('401: your api key seems not correct, please check it.');
-        }
-
-        $encodedData = json_encode($data);
-
-        $ch = curl_init(self::RECEIPTFUL_URL . $url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($encodedData),
-            'X-ApiKey: ' . $apiKey
-        ));
-
-        $result = curl_exec($ch);
-
-
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        curl_close($ch);
-
-        if (in_array($httpCode, array(200, 201))) {
-            return json_decode($result, true);
-        }
-
-        if (400 === $httpCode) {
-            $result = json_decode($result, true);
-
-            throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': ' . implode(', ', $result));
-        }
-
-        if (401 === $httpCode) {
-            throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': your api key seems not correct, please check it.');
-        }
-
-        throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': an unexpected exception has occurred.');
-    }
-
-    public function addCustomResendButton($observer)
-    {
-        $block = $observer->getEvent()->getBlock();
-
-        if (
-            $block instanceof Mage_Adminhtml_Block_Sales_Order_Invoice_View &&
-            'sales_order_invoice' === $block->getRequest()->getControllerName()
-        ) {
-            $block->removeButton('send_notification');
-
-            $invoice = Mage::registry('current_invoice');
-
-            $receiptId = $invoice->getReceiptfulId();
-
-            // If we don't have a receiptful id, stick to default send functionality
-            if (!$receiptId) {
-                return;
-            }
-
-            $resendUrl = Mage::helper('adminhtml')
-                ->getUrl(
-                    'adminhtml/receipt/resend',
-                    array(
-                        'order_id'  => $invoice->getOrder()->getId(),
-                        'invoice_id'=> $invoice->getId(),
-                    )
-                );
-
-            $block->addButton('send_notification', array(
-                'label'     => Mage::helper('sales')->__('Send Email'),
-                'onclick'   => 'confirmSetLocation(\''
-                . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
-                . '\', \'' . $resendUrl . '\')'
-            ));
-        }
-    }
-
-    public function addViewReceiptButton($observer)
-    {
-        $block = $observer->getEvent()->getBlock();
-
-        if (
-            $block instanceof Mage_Adminhtml_Block_Sales_Order_Invoice_View &&
-            'sales_order_invoice' === $block->getRequest()->getControllerName()
-        ) {
-            $invoice = Mage::registry('current_invoice');
-
-            $receiptId = $invoice->getReceiptfulId();
-
-            if (!$receiptId) {
-                return;
-            }
-
-            $receiptUrl = 'https://app.receiptful.com/receipt/' . $receiptId;
-
-            $block->addButton('view_receipt', array(
-                'label'     => Mage::helper('sales')->__('View Receipt'),
-                'onclick'   => 'popWin(\''.$receiptUrl.'\', \'_blank\')'
-            ));
-        }
     }
 }

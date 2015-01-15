@@ -43,7 +43,7 @@ class Receiptful_Core_Adminhtml_ReceiptController extends Mage_Adminhtml_Control
         }
 
         try {
-            Receiptful_Core_Model_Observer::sendRequest(array(), sprintf('/receipts/%s/send', $receiptId));
+            Receiptful_Core_ApiClient::sendRequest(array(), sprintf('/receipts/%s/send', $receiptId));
 
             $session->addSuccess(Mage::helper('sales')->__('The receipt has been sent correctly.'));
         } catch (Receiptful_Core_Exception_FailedRequestException $e) {

@@ -58,7 +58,7 @@
                 <observers>
                     <Receiptful_Core_Create_Receipt>
                         <type>singleton</type>
-                        <class>Receiptful_Core_Model_Observer</class>
+                        <class>Receiptful_Core_Observer_Receipt</class>
                         <method>createReceipt</method>
                     </Receiptful_Core_Create_Receipt>
                 </observers>
@@ -67,12 +67,12 @@
                 <observers>
                     <Receiptful_Core_Custom_Resend_Button>
                         <type>singleton</type>
-                        <class>Receiptful_Core_Model_Observer</class>
+                        <class>Receiptful_Core_Observer_Receipt</class>
                         <method>addCustomResendButton</method>
                     </Receiptful_Core_Custom_Resend_Button>
                     <Receiptful_Core_View_Receipt>
                         <type>singleton</type>
-                        <class>Receiptful_Core_Model_Observer</class>
+                        <class>Receiptful_Core_Observer_Receipt</class>
                         <method>addViewReceiptButton</method>
                     </Receiptful_Core_View_Receipt>
                 </observers>
