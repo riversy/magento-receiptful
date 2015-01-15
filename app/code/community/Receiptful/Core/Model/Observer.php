@@ -18,6 +18,8 @@ class Receiptful_Core_Model_Observer
         try {
             $result = static::sendRequest($data, '/receipts');
 
+            $this->handleUpsellResponse($result);
+
             $invoice->setReceiptfulId($result['_id']);
 
             $order->addStatusToHistory(
@@ -32,6 +34,87 @@ class Receiptful_Core_Model_Observer
                 false
             );
         }
+    }
+
+    private function handleUpsellResponse(array $response)
+    {
+        if (!isset($response['upsell'])) {
+            return;
+        }
+
+        $upsell = $response['upsell'];
+
+        if (!$upsell['active']) {
+            return;
+        }
+
+        $handlers = array(
+            'discountcoupon' => array($this, 'handleDiscountCoupon'),
+            'shippingcoupon' => array($this, 'handleShippingCoupon')
+        );
+
+        if (!array_key_exists($upsell['upsellType'], $handlers)) {
+            return;
+        }
+
+        // All customer group ids
+        $customerGroupIds = Mage::getModel('customer/group')->getCollection()->getAllIds();
+
+        // SalesRule Rule model
+        $rule = Mage::getModel('salesrule/rule');
+
+        $couponCode = $upsell['couponCode'];
+        $description = 'Receiptful Coupon Code ' . $couponCode;
+        $couponType = $upsell['couponType'];
+        $upsellType = $upsell['upsellType'];
+
+        $websiteIds = array_map(
+            function ($website) {
+                return $website->getId();
+            },
+            Mage::app()->getWebsites()
+        );
+
+        $rule->setName($description)
+            ->setDescription($description)
+            ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
+            ->setCouponCode($couponCode)
+            ->setUsesPerCustomer(1)
+            ->setUsesPerCoupon(1)
+            ->setCustomerGroupIds($customerGroupIds)
+            ->setIsActive(1)
+            ->setStopRulesProcessing(0)
+            ->setIsAdvanced(1)
+            ->setSortOrder(0)
+            ->setDiscountQty(1)
+            ->setDiscountStep(0)
+            ->setWebsiteIds($websiteIds)
+            ->setToDate($upsell['expiresAt']);
+
+        call_user_func($handlers[$upsell['upsellType']], $upsell, $rule);
+
+        $rule
+            ->save();
+    }
+
+    private function handleShippingCoupon(array $upsell, $rule)
+    {
+        $rule
+            ->setSimpleAction(Mage_SalesRule_Model_Rule::BY_FIXED_ACTION)
+            ->setDiscountAmount(0)
+            ->setSimpleFreeShipping(Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM);
+
+    }
+
+    private function handleDiscountCoupon(array $upsell, $rule)
+    {
+        $simpleAction = $upsell['couponType'] === 1 ?
+            Mage_SalesRule_Model_Rule::BY_FIXED_ACTION :
+            Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION;
+
+        $rule
+            ->setSimpleAction($simpleAction)
+            ->setDiscountAmount($upsell['amount']);
     }
 
     private function transformInvoiceToReceipt(Mage_Sales_Model_Order_Invoice $invoice)
