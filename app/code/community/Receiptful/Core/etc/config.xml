@@ -22,6 +22,17 @@
             </receiptful_setup>
         </resources>
     </global>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <receiptful after="Mage_Adminhtml">Receiptful_Core_Adminhtml</receiptful>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
     <adminhtml>
         <acl>
             <resources>

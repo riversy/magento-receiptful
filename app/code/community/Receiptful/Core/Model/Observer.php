@@ -186,11 +186,22 @@ class Receiptful_Core_Model_Observer
         ) {
             $block->removeButton('send_notification');
 
+            $invoice = Mage::registry('current_invoice');
+
+            $resendUrl = Mage::helper('adminhtml')
+                ->getUrl(
+                    'adminhtml/receipt/resend',
+                    array(
+                        'order_id'  => $invoice->getOrder()->getId(),
+                        'invoice_id'=> $invoice->getId(),
+                    )
+                );
+
             $block->addButton('send_notification', array(
                 'label'     => Mage::helper('sales')->__('Send Email'),
                 'onclick'   => 'confirmSetLocation(\''
                 . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
-                . '\', \'' . 1 . '\')'
+                . '\', \'' . $resendUrl . '\')'
             ));
         }
     }
