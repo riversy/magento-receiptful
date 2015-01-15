@@ -13,8 +13,6 @@ class Receiptful_Core_ApiClient
 {
     const RECEIPTFUL_API_KEY_CONFIGURATION = 'receiptful/configuration/api_key';
 
-    const RECEIPTFUL_URL = 'http://localhost:9000/api/v1';
-
     /**
      * Send a request to Receiptful apis
      *
@@ -27,7 +25,7 @@ class Receiptful_Core_ApiClient
      */
     public static function sendRequest(array $data, $url)
     {
-        $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
+        $apiKey = static::getApiKey();
 
         // If the module has not been configured yet, skip everything
         if (!$apiKey) {
@@ -36,7 +34,7 @@ class Receiptful_Core_ApiClient
 
         $encodedData = json_encode($data);
 
-        $ch = curl_init(self::RECEIPTFUL_URL . $url);
+        $ch = curl_init(static::getUrl() . $url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -68,5 +66,27 @@ class Receiptful_Core_ApiClient
         }
 
         throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': an unexpected exception has occurred.');
+    }
+
+    private static function getUrl()
+    {
+        $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
+
+        if (preg_match('/staging/', $apiKey)) {
+            return 'http://staging.receiptful.com/api/v1';
+        }
+
+        if (preg_match('/localhost/', $apiKey)) {
+            return 'http://localhost:9000/api/v1';
+        }
+
+        return 'https://app.receiptful.com/api/v1';
+    }
+
+    private static function getApiKey()
+    {
+        $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
+
+        return str_replace('staging-', '', str_replace('localhost-', '', $apiKey));
     }
 }
