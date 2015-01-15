@@ -188,6 +188,13 @@ class Receiptful_Core_Model_Observer
 
             $invoice = Mage::registry('current_invoice');
 
+            $receiptId = $invoice->getReceiptfulId();
+
+            // If we don't have a receiptful id, stick to default send functionality
+            if (!$receiptId) {
+                return;
+            }
+
             $resendUrl = Mage::helper('adminhtml')
                 ->getUrl(
                     'adminhtml/receipt/resend',
