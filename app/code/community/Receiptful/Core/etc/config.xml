@@ -11,13 +11,6 @@
                 <class>Receiptful_Core_Helper</class>
             </receiptful>
         </helpers>
-        <blocks>
-            <adminhtml>
-                <rewrite>
-                    <sales_order_invoice_view>Receiptful_Core_Block_Sales_Order_Invoice_View</sales_order_invoice_view>
-                </rewrite>
-            </adminhtml>
-        </blocks>
         <resources>
             <receiptful_setup>
                 <setup>
@@ -59,6 +52,15 @@
                     </Receiptful_Core_Create_Receipt>
                 </observers>
             </sales_order_invoice_pay>
+            <core_block_abstract_prepare_layout_before>
+                <observers>
+                    <Receiptful_Core_Custom_Resend_Button>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Model_Observer</class>
+                        <method>addCustomResendButton</method>
+                    </Receiptful_Core_Custom_Resend_Button>
+                </observers>
+            </core_block_abstract_prepare_layout_before>
         </events>
     </adminhtml>
 </config>

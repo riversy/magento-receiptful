@@ -175,4 +175,23 @@ class Receiptful_Core_Model_Observer
 
         throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': an unexpected exception has occurred.');
     }
+
+    public function addCustomResendButton($observer)
+    {
+        $block = $observer->getEvent()->getBlock();
+
+        if (
+            $block instanceof Mage_Adminhtml_Block_Sales_Order_Invoice_View &&
+            'sales_order_invoice' === $block->getRequest()->getControllerName()
+        ) {
+            $block->removeButton('send_notification');
+
+            $block->addButton('send_notification', array(
+                'label'     => Mage::helper('sales')->__('Send Email'),
+                'onclick'   => 'confirmSetLocation(\''
+                . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
+                . '\', \'' . 1 . '\')'
+            ));
+        }
+    }
 }
