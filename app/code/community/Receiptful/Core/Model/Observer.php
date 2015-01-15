@@ -205,4 +205,29 @@ class Receiptful_Core_Model_Observer
             ));
         }
     }
+
+    public function addViewReceiptButton($observer)
+    {
+        $block = $observer->getEvent()->getBlock();
+
+        if (
+            $block instanceof Mage_Adminhtml_Block_Sales_Order_Invoice_View &&
+            'sales_order_invoice' === $block->getRequest()->getControllerName()
+        ) {
+            $invoice = Mage::registry('current_invoice');
+
+            $receiptId = $invoice->getReceiptfulId();
+
+            if (!$receiptId) {
+                return;
+            }
+
+            $receiptUrl = 'https://app.receiptful.com/receipt/' . $receiptId;
+
+            $block->addButton('view_receipt', array(
+                'label'     => Mage::helper('sales')->__('View Receipt'),
+                'onclick'   => 'popWin(\''.$receiptUrl.'\', \'_blank\')'
+            ));
+        }
+    }
 }

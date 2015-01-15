@@ -70,6 +70,11 @@
                         <class>Receiptful_Core_Model_Observer</class>
                         <method>addCustomResendButton</method>
                     </Receiptful_Core_Custom_Resend_Button>
+                    <Receiptful_Core_View_Receipt>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Model_Observer</class>
+                        <method>addViewReceiptButton</method>
+                    </Receiptful_Core_View_Receipt>
                 </observers>
             </core_block_abstract_prepare_layout_before>
         </events>
