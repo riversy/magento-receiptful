@@ -28,6 +28,22 @@ class Receiptful_Core_Adminhtml_ReceiptController extends Mage_Adminhtml_Control
             return $redirect();
         }
 
+        $receiptId = $invoice->getReceiptfulId();
+
+        if (!$receiptId) {
+            $session->addError(Mage::helper('sales')->__('The receipt has not been sent with Receiptful.'));
+
+            return $redirect();
+        }
+
+        try {
+            Receiptful_Core_Model_Observer::sendRequest(array(), sprintf('/receipts/%s/send', $receiptId));
+
+            $session->addSuccess(Mage::helper('sales')->__('The receipt has been sent correctly.'));
+        } catch (Receiptful_Core_Exception_FailedRequestException $e) {
+            $session->addError($e->getMessage());
+        }
+
         return $redirect();
     }
 }

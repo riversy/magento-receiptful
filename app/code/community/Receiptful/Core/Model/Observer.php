@@ -7,13 +7,6 @@ class Receiptful_Core_Model_Observer
 
     public function createReceipt(Varien_Event_Observer $observer)
     {
-        $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
-
-        // If the module has not been configured yet, skip everything
-        if (!$apiKey) {
-            return;
-        }
-
         // This should override email sending but not persisting it
         Mage::app()->getStore()->setConfig(Mage_Sales_Model_Order::XML_PATH_EMAIL_ENABLED, '0');
 
@@ -23,7 +16,7 @@ class Receiptful_Core_Model_Observer
         $data = $this->transformInvoiceToReceipt($invoice);
 
         try {
-            $result = $this->sendRequest($data, $apiKey);
+            $result = static::sendRequest($data, '/receipts');
 
             $invoice->setReceiptfulId($result['_id']);
 
@@ -138,11 +131,18 @@ class Receiptful_Core_Model_Observer
         return $data;
     }
 
-    private function sendRequest(array $data, $apiKey)
+    public static function sendRequest(array $data, $url)
     {
+        $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
+
+        // If the module has not been configured yet, skip everything
+        if (!$apiKey) {
+            throw new Receiptful_Core_Exception_FailedRequestException('401: your api key seems not correct, please check it.');
+        }
+
         $encodedData = json_encode($data);
 
-        $ch = curl_init(self::RECEIPTFUL_URL . '/receipts');
+        $ch = curl_init(self::RECEIPTFUL_URL . $url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -159,7 +159,7 @@ class Receiptful_Core_Model_Observer
 
         curl_close($ch);
 
-        if (201 === $httpCode) {
+        if (in_array($httpCode, array(200, 201))) {
             return json_decode($result, true);
         }
 
