@@ -1,23 +1,29 @@
 <?php
+/**
+ * This file is part of the Receiptful extension.
+ *
+ * (c) Receiptful <info@receiptful.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author Stefano Sala <stefano@receiptful.com>
+ */
 class Receiptful_Core_Adminhtml_ReceiptController extends Mage_Adminhtml_Controller_Action
 {
+    /**
+     * Resend a receipt
+     */
     public function resendAction()
     {
-        $_this = $this;
         $session = $this->_getSession();
 
         $invoiceId = $this->getRequest()->getParam('invoice_id');
 
-        $redirect = function () use ($_this, $invoiceId) {
-            $_this->_redirect('*/sales_invoice/view', array(
-                'invoice_id'=> $invoiceId,
-            ));
-        };
-
         if (!$invoiceId) {
             $session->addError(Mage::helper('sales')->__('Invoice not found.'));
 
-            return $redirect();
+            return $this->redirect();
         }
 
         $invoice = Mage::getModel('sales/order_invoice')->load($invoiceId);
@@ -25,7 +31,7 @@ class Receiptful_Core_Adminhtml_ReceiptController extends Mage_Adminhtml_Control
         if (!$invoice) {
             $session->addError(Mage::helper('sales')->__(sprintf('Invoice with id %s not found.', $invoiceId)));
 
-            return $redirect();
+            return $this->redirect();
         }
 
         $receiptId = $invoice->getReceiptfulId();
@@ -33,7 +39,7 @@ class Receiptful_Core_Adminhtml_ReceiptController extends Mage_Adminhtml_Control
         if (!$receiptId) {
             $session->addError(Mage::helper('sales')->__('The receipt has not been sent with Receiptful.'));
 
-            return $redirect();
+            return $this->redirect();
         }
 
         try {
@@ -44,6 +50,16 @@ class Receiptful_Core_Adminhtml_ReceiptController extends Mage_Adminhtml_Control
             $session->addError($e->getMessage());
         }
 
-        return $redirect();
+        return $this->redirect();
+    }
+
+    /**
+     * Redirect to invoice view
+     */
+    private function redirect()
+    {
+        return $this->_redirect('*/sales_invoice/view', array(
+            'invoice_id'=> $this->getRequest()->getParam('invoice_id'),
+        ));
     }
 }
