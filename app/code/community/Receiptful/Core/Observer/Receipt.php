@@ -80,7 +80,7 @@ class Receiptful_Core_Observer_Receipt
                     )
                 );
 
-            $block->addButton('send_notification', array(
+            $block->addButton('send_receiptful_notification', array(
                 'label'     => Mage::helper('sales')->__('Send Email'),
                 'onclick'   => 'confirmSetLocation(\''
                 . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
