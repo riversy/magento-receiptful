@@ -215,9 +215,10 @@ class Receiptful_Core_Observer_Receipt
             'billing' => array()
         );
 
-        if ($payment = $order->getPayment()) {
+        if (($payment = $order->getPayment()) && $payment->getCcType()) {
             $data['payment'] = array(
-                'type' => $payment->getMethodInstance()->getTitle()
+                'type' => $payment->getCcType(),
+                'last4' => $payment->getCcLast4()
             );
         }
 
