@@ -68,19 +68,24 @@ class Receiptful_Core_ApiClient
         throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': an unexpected exception has occurred.');
     }
 
-    private static function getUrl()
+    public static function getBaseUrl()
     {
         $apiKey = Mage::getStoreConfig(self::RECEIPTFUL_API_KEY_CONFIGURATION);
 
         if (preg_match('/staging/', $apiKey)) {
-            return 'http://staging.receiptful.com/api/v1';
+            return 'http://staging.receiptful.com';
         }
 
         if (preg_match('/localhost/', $apiKey)) {
-            return 'http://localhost:9000/api/v1';
+            return 'http://localhost:9000';
         }
 
-        return 'https://app.receiptful.com/api/v1';
+        return 'https://app.receiptful.com';
+    }
+
+    private static function getUrl()
+    {
+        return $this->getBaseUrl() . '/api/v1';
     }
 
     private static function getApiKey()
