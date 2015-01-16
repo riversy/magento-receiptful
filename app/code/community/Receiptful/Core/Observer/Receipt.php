@@ -230,23 +230,37 @@ class Receiptful_Core_Observer_Receipt
             );
         }
 
-        if ($amount = $invoice->getDiscountAmount()) {
+        /**
+         * Add shipping
+         */
+        if (!$invoice->getIsVirtual() && ((float) $invoice->getShippingAmount() || $invoice->getShippingDescription())) {
             $data['subtotals'][] = array(
-                'description' => $invoice->getDiscountDescription(),
-                'amount' => $amount
+                'description' => Mage::helper('sales')->__('Shipping & Handling'),
+                'amount' => $invoice->getShippingAmount()
             );
         }
 
+        /**
+         * Add discount
+         */
+        if (((float)$invoice->getDiscountAmount()) != 0) {
+            if ($invoice->getDiscountDescription()) {
+                $discountLabel = Mage::helper('sales')->__('Discount (%s)', $invoice->getDiscountDescription());
+            } else {
+                $discountLabel = Mage::helper('sales')->__('Discount');
+            }
+            $data['subtotals'][] = array(
+                'description' => $discountLabel,
+                'amount' => $invoice->getDiscountAmount()
+            );
+        }
+
+        /**
+         * Add taxes
+         */
         if ($amount = $invoice->getTaxAmount()) {
             $data['subtotals'][] = array(
                 'description' => Mage::helper('sales')->__('Tax'),
-                'amount' => $amount
-            );
-        }
-
-        if ($amount = $invoice->getShippingAmount()) {
-            $data['subtotals'][] = array(
-                'description' => $order->getShippingDescription(),
                 'amount' => $amount
             );
         }
