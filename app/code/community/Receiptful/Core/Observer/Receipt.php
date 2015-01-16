@@ -110,7 +110,7 @@ class Receiptful_Core_Observer_Receipt
                 return;
             }
 
-            $receiptUrl = 'https://app.receiptful.com/receipt/' . $receiptId;
+            $receiptUrl = Receiptful_Core_ApiClient::getBaseUrl() . '/receipt/' . $receiptId;
 
             $block->addButton('view_receipt', array(
                 'label'     => Mage::helper('sales')->__('View Receipt'),
@@ -176,8 +176,7 @@ class Receiptful_Core_Observer_Receipt
 
         call_user_func($handlers[$upsell['upsellType']], $upsell, $rule);
 
-        $rule
-            ->save();
+        $rule->save();
     }
 
     private function handleShippingCoupon(array $upsell, $rule)
