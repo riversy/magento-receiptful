@@ -85,7 +85,7 @@ class Receiptful_Core_ApiClient
 
     private static function getUrl()
     {
-        return $this->getBaseUrl() . '/api/v1';
+        return static::getBaseUrl() . '/api/v1';
     }
 
     private static function getApiKey()
