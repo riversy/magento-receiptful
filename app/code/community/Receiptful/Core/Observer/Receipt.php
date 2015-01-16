@@ -222,6 +222,10 @@ class Receiptful_Core_Observer_Receipt
         }
 
         foreach ($invoice->getAllItems() as $item) {
+            if ($item->getOrderItem()->getParentItem()) {
+                continue;
+            }
+
             $data['items'][] = array(
                 'reference' => $item->getSku(),
                 'description' => $item->getName(),
