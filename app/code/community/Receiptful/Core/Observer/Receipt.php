@@ -227,12 +227,29 @@ class Receiptful_Core_Observer_Receipt
                 continue;
             }
 
-            $data['items'][] = array(
+            $_item = array(
                 'reference' => $item->getSku(),
                 'description' => $item->getName(),
                 'quantity' => (int) $item->getQty(),
                 'amount' => $item->getPrice()
             );
+
+            $options = $item->getOrderItem()->getProductOptions();
+
+            if ($options && isset($options['attributes_info'])) {
+                $attributes = $options['attributes_info'];
+
+                $_item['metas'] = array();
+
+                foreach ($attributes as $attribute) {
+                    $_item['metas'][] = array(
+                        'key' => $attribute['label'],
+                        'value' => $attribute['value']
+                    );
+                }
+            }
+
+            $data['items'][] = $_item;
         }
 
         /**
