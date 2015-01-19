@@ -21,7 +21,18 @@ class Receiptful_Core_Observer_Receipt
         // This should override email sending but not persisting it
         Mage::app()->getStore()->setConfig(Mage_Sales_Model_Order::XML_PATH_EMAIL_ENABLED, '0');
 
-        $invoice = $observer->getEvent()->getInvoice();
+        try {
+            return $this->createInvoiceReceipt($observer->getEvent()->getInvoice());
+        } catch (Receiptful_Core_Exception_FailedRequestException $e) {
+            // Not raising this exception
+        }
+    }
+
+    /**
+     * Create a Receipt in Receiptful
+     */
+    public function createInvoiceReceipt($invoice)
+    {
         $order = $invoice->getOrder();
 
         $data = $this->transformInvoiceToReceipt($invoice);
@@ -46,6 +57,8 @@ class Receiptful_Core_Observer_Receipt
                 'Receiptful failed to send receipt: ' . $e->getMessage(),
                 false
             );
+
+            throw $e;
         }
     }
 
