@@ -37,13 +37,16 @@ class Receiptful_Core_Observer_Receipt
 
         $data = $this->transformInvoiceToReceipt($invoice);
 
+        if ($invoice->getReceiptfulId()) {
+            return;
+        }
+
         try {
             $result = Receiptful_Core_ApiClient::sendRequest($data, '/receipts');
 
             $this->handleUpsellResponse($result);
 
             $invoice->setReceiptfulId($result['_id']);
-            $invoice->setReceiptfulReceiptSentAt(time());
             $invoice->setEmailSent(true);
 
             $order->addStatusToHistory(
@@ -52,6 +55,8 @@ class Receiptful_Core_Observer_Receipt
                 false
             );
         } catch (Receiptful_Core_Exception_FailedRequestException $e) {
+            $invoice->setReceiptfulReceiptFailedAt(time());
+
             $order->addStatusToHistory(
                 $order->getStatus(),
                 'Receiptful failed to send receipt: ' . $e->getMessage(),

@@ -16,7 +16,7 @@ $installer
     ->getConnection()
     ->addColumn(
         $installer->getTable('sales/invoice'),
-        'receiptful_receipt_sent_at',
+        'receiptful_receipt_failed_at',
         array(
             'type' => Varien_Db_Ddl_Table::TYPE_DATETIME,
             'nullable' => true,

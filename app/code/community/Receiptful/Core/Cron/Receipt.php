@@ -21,10 +21,14 @@ class Receiptful_Core_Cron_Receipt
         $readConnection = $resource->getConnection('core_read');
 
         $query = 'SELECT * FROM ' . $resource->getTableName('sales/invoice') .
-            ' WHERE receiptful_receipt_sent_at IS NULL' .
-            ' AND receiptful_id is NOT NULL';
+            ' WHERE receiptful_receipt_failed_at IS NOT NULL' .
+            ' AND receiptful_id is NULL';
 
         $results = $readConnection->fetchAll($query);
+
+        Mage::Log(sprintf('Running resend on %s receipts.', $results));
+
+        $receiptObserver = new Receiptful_Core_Observer_Receipt();
 
         foreach ($results as $invoiceData) {
             Mage::Log(sprintf('Running send on ' . $invoiceData['entity_id']));
@@ -32,10 +36,14 @@ class Receiptful_Core_Cron_Receipt
             $invoice = Mage::getModel('sales/order_invoice')->load($invoiceData['entity_id']);
 
             try {
-                Receiptful_Core_Observer_Receipt::createInvoiceReceipt($invoice);
+                $receiptObserver->createInvoiceReceipt($invoice);
+
+                Mage::Log('Done');
             } catch (Exception $e) {
-                Mage::Log($e);
+                Mage::Log('Got exception: ' . $e->getMessage());
             }
+
+            $invoice->save();
         }
     }
 }
