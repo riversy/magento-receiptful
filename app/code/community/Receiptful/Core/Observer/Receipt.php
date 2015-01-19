@@ -32,6 +32,7 @@ class Receiptful_Core_Observer_Receipt
             $this->handleUpsellResponse($result);
 
             $invoice->setReceiptfulId($result['_id']);
+            $invoice->setReceiptfulReceiptSentAt(time());
             $invoice->setEmailSent(true);
 
             $order->addStatusToHistory(
