@@ -21,6 +21,16 @@
                 </connection>
             </receiptful_setup>
         </resources>
+        <blocks>
+            <receiptful>
+                <class>Receiptful_Core</class>
+            </receiptful>
+            <page>
+                <rewrite>
+                    <html_head>Receiptful_Core_Block_Html_Head</html_head>
+                </rewrite>
+            </page>
+        </blocks>
     </global>
     <admin>
         <routers>
