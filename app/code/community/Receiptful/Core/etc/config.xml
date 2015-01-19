@@ -31,6 +31,26 @@
                 </rewrite>
             </page>
         </blocks>
+        <events>
+            <checkout_multishipping_controller_success_action>
+                <observers>
+                    <Receiptful_Core_Tracking>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Observer_Tracking</class>
+                        <method>addTrackingConversion</method>
+                    </Receiptful_Core_Tracking>
+                </observers>
+            </checkout_multishipping_controller_success_action>
+            <checkout_onepage_controller_success_action>
+                <observers>
+                    <Receiptful_Core_Tracking>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Observer_Tracking</class>
+                        <method>addTrackingConversion</method>
+                    </Receiptful_Core_Tracking>
+                </observers>
+            </checkout_onepage_controller_success_action>
+        </events>
     </global>
     <admin>
         <routers>

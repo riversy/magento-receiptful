@@ -37,4 +37,16 @@ class Receiptful_Core_Block_Html_Head extends Mage_Page_Block_Html_Head
 
         return parent::_separateOtherHtmlHeadElements($lines, $itemIf, $itemType, $itemParams, $itemName, $itemThe);
     }
+
+    /**
+     * Remove External Item from HEAD entity
+     *
+     * @param string $type
+     * @param string $name
+     * @return Mage_Page_Block_Html_Head
+     */
+    public function removeExternalItem($type, $name)
+    {
+        parent::removeItem($type, $name);
+    }
 }
