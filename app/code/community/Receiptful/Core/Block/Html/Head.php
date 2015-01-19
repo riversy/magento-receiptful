@@ -18,7 +18,7 @@ class Receiptful_Core_Block_Html_Head extends Mage_Page_Block_Html_Head
     {
         parent::_construct();
 
-        $this->addItem('external_js', 'https://app.receiptful.com/scripts/tracking.js');
+        $this->addItem('external_js', Receiptful_Core_ApiClient::getBaseUrl() . '/scripts/tracking.js');
         $this->addItem('js_text', 'Receiptful.setTrackingCookie();');
     }
 
