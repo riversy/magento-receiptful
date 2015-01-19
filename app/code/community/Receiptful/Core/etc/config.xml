@@ -2,10 +2,15 @@
 <config>
     <modules>
         <Receiptful_Core>
-            <version>0.0.5</version>
+            <version>0.0.6</version>
         </Receiptful_Core>
     </modules>
     <global>
+        <models>
+            <receiptful_cron>
+                <class>Receiptful_Core_Cron</class>
+            </receiptful_cron>
+        </models>
         <helpers>
             <receiptful>
                 <class>Receiptful_Core_Helper</class>
@@ -109,4 +114,16 @@
             </core_block_abstract_prepare_layout_before>
         </events>
     </adminhtml>
+    <crontab>
+        <jobs>
+            <receiptful_receipt_resend_failure>
+                <schedule>
+                    <cron_expr>*/2 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>receiptful_cron/receipt::resendFailures</model>
+                </run>
+            </receiptful_receipt_resend_failure>
+        </jobs>
+    </crontab>
 </config>
