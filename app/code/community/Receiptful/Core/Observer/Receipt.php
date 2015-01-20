@@ -241,7 +241,9 @@ class Receiptful_Core_Observer_Receipt
             );
         }
 
-        foreach ($invoice->getAllItems() as $item) {
+        $items = $invoice->getAllItems();
+
+        foreach ($items as $item) {
             if ($item->getOrderItem()->getParentItem()) {
                 continue;
             }
@@ -269,6 +271,49 @@ class Receiptful_Core_Observer_Receipt
             }
 
             $data['items'][] = $_item;
+        }
+
+        // Similar products (same category)
+        foreach ($items as $item) {
+            if ($item->getOrderItem()->getParentItem()) {
+                continue;
+            }
+
+            $product = $item->getOrderItem()->getProduct();
+
+            $categoryIds = $product->getCategoryIds();
+
+            if (0 === $categoryIds) {
+                continue;
+            }
+
+            $category = Mage::getModel('catalog/category')->load($categoryIds[0]);
+
+            $productCollection = Mage::getResourceModel('catalog/product_collection')
+                ->addCategoryFilter($category)
+                ->addFieldToFilter('entity_id', array('neq' => $product->getId()))
+                ->addFieldToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+                ->setPageSize(2);
+
+            $data['upsell'] = array(
+                'products' => array()
+            );
+
+            $productModel = Mage::getModel('catalog/product');
+
+            foreach ($productCollection as $similarProduct) {
+                $similarProduct = $productModel
+                    ->load($similarProduct->getId());
+
+                $data['upsell']['products'][] = array(
+                    'title' => $similarProduct->getName(),
+                    'description' => $similarProduct->getShortDescription(),
+                    'image' => (string) Mage::helper('catalog/image')->init($product, 'thumbnail'),
+                    'actionUrl' => $similarProduct->getProductUrl()
+                );
+            }
+
+            break;
         }
 
         /**
