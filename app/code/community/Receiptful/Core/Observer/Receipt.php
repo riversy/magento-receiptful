@@ -305,12 +305,19 @@ class Receiptful_Core_Observer_Receipt
                 $similarProduct = $productModel
                     ->load($similarProduct->getId());
 
-                $data['upsell']['products'][] = array(
+                $similarProductData = array(
                     'title' => $similarProduct->getName(),
                     'description' => $similarProduct->getShortDescription(),
-                    'image' => (string) Mage::helper('catalog/image')->init($product, 'thumbnail'),
                     'actionUrl' => $similarProduct->getProductUrl()
                 );
+
+                try {
+                    $similarProductData['image'] = (string) Mage::helper('catalog/image')->init($product, 'thumbnail');
+                } catch (Exception $e) {
+                    // Unable to load the image, skip it.
+                }
+
+                $data['upsell']['products'][] = $similarProductData;
             }
 
             break;
