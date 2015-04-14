@@ -30,11 +30,6 @@
             <receiptful>
                 <class>Receiptful_Core</class>
             </receiptful>
-            <page>
-                <rewrite>
-                    <html_head>Receiptful_Core_Block_Html_Head</html_head>
-                </rewrite>
-            </page>
         </blocks>
         <events>
             <checkout_multishipping_controller_success_action>
@@ -68,6 +63,15 @@
             </adminhtml>
         </routers>
     </admin>
+    <frontend>
+        <layout>
+            <updates>
+                <receiptful_core>
+                    <file>receiptful.xml</file>
+                </receiptful_core>
+            </updates>
+        </layout>
+    </frontend>
     <adminhtml>
         <acl>
             <resources>

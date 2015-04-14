@@ -7,8 +7,9 @@ app/code/community/Cm/
 app/code/local/
 app/code/core/
 app/design/adminhtml/default/default/
-app/design/adminhtml/base/default/template/smtppro/view.phtml
 app/design/frontend/base/
+!app/design/frontend/base/default/layout/receiptful.xml
+!app/design/frontend/base/default/template/receiptful/scripts.phtml
 app/design/frontend/rwd/
 app/design/frontend/default/blank/
 app/design/frontend/default/default/
@@ -111,3 +112,4 @@ skin/frontend/default/modern/
 skin/frontend/enterprise
 skin/install/
 var/
+

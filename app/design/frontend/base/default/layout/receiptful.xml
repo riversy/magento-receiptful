@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * This file is part of the Receiptful extension.
+ *
+ * (c) Receiptful <info@receiptful.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author Stefano Sala <stefano@receiptful.com>
+ */
+-->
+<layout version="0.1.0">
+    <default>
+        <reference name="before_body_end">
+            <block type="core/template"
+                   name="receiptful_core_scripts"
+                   as="receiptful_core_scripts"
+                   template="receiptful/scripts.phtml"/>
+        </reference>
+    </default>
+</layout>
