@@ -1,0 +1,27 @@
+<?php
+/**
+ * This file is part of the Receiptful extension.
+ *
+ * (c) Receiptful <info@receiptful.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author Stefano Sala <stefano@receiptful.com>
+ */
+
+/** @var Receiptful_Core_Block_Tracking $this */
+?>
+
+<?php if ($this->hasOrder()): ?>
+    <?php $order = $this->getOrder(); ?>
+    <script type="text/javascript">
+    //<![CDATA[
+    Receiptful.conversion.reference = '<?php echo $order->getIncrementId(); ?>';
+    Receiptful.conversion.amount = <?php echo $order->getGrandTotal(); ?>;
+    Receiptful.conversion.currency = '<?php echo $order->getOrderCurrencyCode(); ?>';
+    Receiptful.conversion.couponCode = '<?php echo $order->getCouponCode(); ?>';
+    Receiptful.trackConversion();
+    //]]>
+    </script>
+<?php endif; ?>

@@ -18,6 +18,28 @@
                    name="receiptful_core_scripts"
                    as="receiptful_core_scripts"
                    template="receiptful/scripts.phtml"/>
+
+            <block type="core/template"
+                   name="receiptful_core_add_cookie"
+                   as="receiptful_core_add_cookie"
+                   template="receiptful/add_cookie.phtml"/>
         </reference>
     </default>
+
+    <receiptful_track_order>
+        <remove name="receiptful_core_add_cookie"/>
+        <reference name="before_body_end">
+            <block type="receiptful/tracking"
+                   name="receiptful_core_track_order"
+                   as="receiptful_core_track_order"
+                   template="receiptful/track_order.phtml"/>
+        </reference>
+    </receiptful_track_order>
+
+    <checkout_onepage_success>
+        <update handle="receiptful_track_order"/>
+    </checkout_onepage_success>
+    <checkout_multishipping_success>
+        <update handle="receiptful_track_order"/>
+    </checkout_multishipping_success>
 </layout>
