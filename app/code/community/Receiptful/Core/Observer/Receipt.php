@@ -54,6 +54,7 @@ class Receiptful_Core_Observer_Receipt
                 'Receiptful receipt sent correctly.',
                 false
             );
+
         } catch (Receiptful_Core_Exception_FailedRequestException $e) {
             $invoice->setReceiptfulReceiptFailedAt(time());
 
@@ -95,16 +96,16 @@ class Receiptful_Core_Observer_Receipt
                 ->getUrl(
                     'adminhtml/receipt/resend',
                     array(
-                        'order_id'  => $invoice->getOrder()->getId(),
-                        'invoice_id'=> $invoice->getId(),
+                        'order_id' => $invoice->getOrder()->getId(),
+                        'invoice_id' => $invoice->getId(),
                     )
                 );
 
             $block->addButton('send_receiptful_notification', array(
-                'label'     => Mage::helper('sales')->__('Send Email'),
-                'onclick'   => 'confirmSetLocation(\''
-                . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
-                . '\', \'' . $resendUrl . '\')'
+                'label' => Mage::helper('sales')->__('Send Email'),
+                'onclick' => 'confirmSetLocation(\''
+                    . Mage::helper('sales')->__('Are you sure you want to send Receipt email to customer?')
+                    . '\', \'' . $resendUrl . '\')'
             ));
         }
     }
@@ -133,8 +134,8 @@ class Receiptful_Core_Observer_Receipt
             $receiptUrl = Receiptful_Core_ApiClient::getBaseUrl() . '/receipt/' . $receiptId;
 
             $block->addButton('view_receipt', array(
-                'label'     => Mage::helper('sales')->__('View Receipt'),
-                'onclick'   => 'popWin(\''.$receiptUrl.'\', \'_blank\')'
+                'label' => Mage::helper('sales')->__('View Receipt'),
+                'onclick' => 'popWin(\'' . $receiptUrl . '\', \'_blank\')'
             ));
         }
     }
@@ -142,7 +143,7 @@ class Receiptful_Core_Observer_Receipt
     private function handleUpsellResponse(array $response)
     {
         if (!isset($response['upsell'])) {
-            return;
+            return $this;
         }
 
         $upsell = $response['upsell'];
@@ -151,72 +152,45 @@ class Receiptful_Core_Observer_Receipt
             return;
         }
 
-        $handlers = array(
-            'discountcoupon' => array($this, 'handleDiscountCoupon'),
-            'shippingcoupon' => array($this, 'handleShippingCoupon')
-        );
+        /** @var Receiptful_Core_Helper_Coupon $couponHelper */
+        $couponHelper = Mage::helper('receiptful/coupon');
 
-        if (!array_key_exists($upsell['upsellType'], $handlers)) {
-            return;
+        $rule = $couponHelper->getCouponRule($upsell);
+        if (!$rule) {
+            # If we didn't found the rule just create new one
+            $rule = $couponHelper->createCouponRule($upsell);
         }
 
-        // All customer group ids
-        $customerGroupIds = Mage::getModel('customer/group')->getCollection()->getAllIds();
+        $couponHelper->createCoupon($rule, $upsell);
 
-        // SalesRule Rule model
-        $rule = Mage::getModel('salesrule/rule');
-
-        $couponCode = $upsell['couponCode'];
-        $description = 'Receiptful Coupon Code ' . $couponCode;
-        $couponType = $upsell['couponType'];
-        $upsellType = $upsell['upsellType'];
-
-        $websiteIds = array_map(
-            function ($website) {
-                return $website->getId();
-            },
-            Mage::app()->getWebsites()
-        );
-
-        $rule->setName($description)
-            ->setDescription($description)
-            ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
-            ->setCouponCode($couponCode)
-            ->setUsesPerCustomer(1)
-            ->setUsesPerCoupon(1)
-            ->setCustomerGroupIds($customerGroupIds)
-            ->setIsActive(1)
-            ->setStopRulesProcessing(0)
-            ->setIsAdvanced(1)
-            ->setSortOrder(0)
-            ->setDiscountQty(1)
-            ->setDiscountStep(0)
-            ->setWebsiteIds($websiteIds)
-            ->setToDate($upsell['expiresAt']);
-
-        call_user_func($handlers[$upsell['upsellType']], $upsell, $rule);
-
-        $rule->save();
+        return $this;
     }
 
-    private function handleShippingCoupon(array $upsell, $rule)
+    /**
+     * Validate Coupon Code for Expiration
+     *
+     * @param $observer
+     * @return $this
+     */
+    public function validateCoupon($observer)
     {
-        $rule
-            ->setSimpleAction(Mage_SalesRule_Model_Rule::BY_FIXED_ACTION)
-            ->setDiscountAmount(0)
-            ->setSimpleFreeShipping(Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM);
+        /** @var Mage_Sales_Model_Quote $quote */
+        $quote = $observer->getQuote();
 
-    }
+        if ($quote && $quote->getCouponCode()){
 
-    private function handleDiscountCoupon(array $upsell, $rule)
-    {
-        $simpleAction = $upsell['couponType'] === 1 ?
-            Mage_SalesRule_Model_Rule::BY_FIXED_ACTION :
-            Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION;
+            $couponCode = $quote->getCouponCode();
 
-        $rule
-            ->setSimpleAction($simpleAction)
-            ->setDiscountAmount($upsell['amount']);
+            /** @var Receiptful_Core_Helper_Coupon $couponHelper */
+            $couponHelper = Mage::helper('receiptful/coupon');
+
+            # Reset the coupon is it was expired
+            if (!$couponHelper->isValid($couponCode)){
+                $quote->setCouponCode(null);
+            }
+        }
+
+        return $this;
     }
 
     private function transformInvoiceToReceipt(Mage_Sales_Model_Order_Invoice $invoice)
@@ -251,7 +225,7 @@ class Receiptful_Core_Observer_Receipt
             $_item = array(
                 'reference' => $item->getSku(),
                 'description' => $item->getName(),
-                'quantity' => (int) $item->getQty(),
+                'quantity' => (int)$item->getQty(),
                 'amount' => $item->getPrice()
             );
 
@@ -312,7 +286,7 @@ class Receiptful_Core_Observer_Receipt
 
                 try {
                     $imageHelper = Mage::helper('catalog/image');
-                    $similarProductData['image'] = (string) $imageHelper->init($similarProduct, 'thumbnail');
+                    $similarProductData['image'] = (string)$imageHelper->init($similarProduct, 'thumbnail');
                 } catch (Exception $e) {
                     // Unable to load the image, skip it.
                 }
@@ -326,7 +300,7 @@ class Receiptful_Core_Observer_Receipt
         /**
          * Add shipping
          */
-        if (!$invoice->getIsVirtual() && ((float) $invoice->getShippingAmount() || $invoice->getShippingDescription())) {
+        if (!$invoice->getIsVirtual() && ((float)$invoice->getShippingAmount() || $invoice->getShippingDescription())) {
             $data['subtotals'][] = array(
                 'description' => Mage::helper('sales')->__('Shipping & Handling'),
                 'amount' => $invoice->getShippingAmount()
