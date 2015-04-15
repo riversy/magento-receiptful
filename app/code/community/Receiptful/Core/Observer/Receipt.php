@@ -147,7 +147,7 @@ class Receiptful_Core_Observer_Receipt
 
         $upsell = $response['upsell'];
 
-        if (!$upsell['active']) {
+        if (!isset($upsell['active']) || !$upsell['active']) {
             return;
         }
 

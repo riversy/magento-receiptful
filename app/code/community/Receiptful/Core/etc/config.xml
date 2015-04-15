@@ -28,34 +28,9 @@
         </resources>
         <blocks>
             <receiptful>
-                <class>Receiptful_Core</class>
+                <class>Receiptful_Core_Block</class>
             </receiptful>
-            <page>
-                <rewrite>
-                    <html_head>Receiptful_Core_Block_Html_Head</html_head>
-                </rewrite>
-            </page>
         </blocks>
-        <events>
-            <checkout_multishipping_controller_success_action>
-                <observers>
-                    <Receiptful_Core_Tracking>
-                        <type>singleton</type>
-                        <class>Receiptful_Core_Observer_Tracking</class>
-                        <method>addTrackingConversion</method>
-                    </Receiptful_Core_Tracking>
-                </observers>
-            </checkout_multishipping_controller_success_action>
-            <checkout_onepage_controller_success_action>
-                <observers>
-                    <Receiptful_Core_Tracking>
-                        <type>singleton</type>
-                        <class>Receiptful_Core_Observer_Tracking</class>
-                        <method>addTrackingConversion</method>
-                    </Receiptful_Core_Tracking>
-                </observers>
-            </checkout_onepage_controller_success_action>
-        </events>
     </global>
     <admin>
         <routers>
@@ -68,6 +43,15 @@
             </adminhtml>
         </routers>
     </admin>
+    <frontend>
+        <layout>
+            <updates>
+                <receiptful_core>
+                    <file>receiptful.xml</file>
+                </receiptful_core>
+            </updates>
+        </layout>
+    </frontend>
     <adminhtml>
         <acl>
             <resources>
