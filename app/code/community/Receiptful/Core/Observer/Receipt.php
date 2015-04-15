@@ -308,6 +308,20 @@ class Receiptful_Core_Observer_Receipt
         }
 
         /**
+         * Add Share Me! Discount
+         */
+        if (Mage::helper('core')->isModuleEnabled('Magpleasure_Shareme')){
+
+            if  ($amount = (float)$order->getSharemeDiscountAmount()){
+
+                $data['subtotals'][] = array(
+                    'description' => Mage::helper('shareme')->__('Share Me! Discount'),
+                    'amount' => $amount,
+                );
+            }
+        }
+
+        /**
          * Add discount
          */
         if (((float)$invoice->getDiscountAmount()) != 0) {
