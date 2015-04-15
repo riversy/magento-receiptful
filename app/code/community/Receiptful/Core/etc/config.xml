@@ -31,6 +31,26 @@
                 <class>Receiptful_Core_Block</class>
             </receiptful>
         </blocks>
+        <events>
+            <sales_quote_collect_totals_before>
+                <observers>
+                    <Receiptful_Core_Validate_Coupon>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Observer_Receipt</class>
+                        <method>validateCoupon</method>
+                    </Receiptful_Core_Validate_Coupon>
+                </observers>
+            </sales_quote_collect_totals_before>
+            <sales_order_invoice_pay>
+                <observers>
+                    <Receiptful_Core_Create_Receipt>
+                        <type>singleton</type>
+                        <class>Receiptful_Core_Observer_Receipt</class>
+                        <method>createReceipt</method>
+                    </Receiptful_Core_Create_Receipt>
+                </observers>
+            </sales_order_invoice_pay>
+        </events>
     </global>
     <admin>
         <routers>
@@ -73,15 +93,6 @@
             </resources>
         </acl>
         <events>
-            <sales_order_invoice_pay>
-                <observers>
-                    <Receiptful_Core_Create_Receipt>
-                        <type>singleton</type>
-                        <class>Receiptful_Core_Observer_Receipt</class>
-                        <method>createReceipt</method>
-                    </Receiptful_Core_Create_Receipt>
-                </observers>
-            </sales_order_invoice_pay>
             <core_block_abstract_prepare_layout_before>
                 <observers>
                     <Receiptful_Core_Custom_Resend_Button>
