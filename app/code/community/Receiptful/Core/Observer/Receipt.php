@@ -51,7 +51,7 @@ class Receiptful_Core_Observer_Receipt
 
             $order->addStatusToHistory(
                 $order->getStatus(),
-                'Receiptful receipt sent correclty.',
+                'Receiptful receipt sent correctly.',
                 false
             );
         } catch (Receiptful_Core_Exception_FailedRequestException $e) {
@@ -299,10 +299,9 @@ class Receiptful_Core_Observer_Receipt
                 'products' => array()
             );
 
-            $productModel = Mage::getModel('catalog/product');
-
             foreach ($productCollection as $similarProduct) {
-                $similarProduct = $productModel
+
+                $similarProduct = Mage::getModel('catalog/product')
                     ->load($similarProduct->getId());
 
                 $similarProductData = array(
@@ -312,7 +311,8 @@ class Receiptful_Core_Observer_Receipt
                 );
 
                 try {
-                    $similarProductData['image'] = (string) Mage::helper('catalog/image')->init($product, 'thumbnail');
+                    $imageHelper = Mage::helper('catalog/image');
+                    $similarProductData['image'] = (string) $imageHelper->init($similarProduct, 'thumbnail');
                 } catch (Exception $e) {
                     // Unable to load the image, skip it.
                 }
