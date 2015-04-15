@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @author Stefano Sala <stefano@receiptful.com>
+ * @author Igor Goltsov <igor@ecomgems.com>
  */
 class Receiptful_Core_Helper_Coupon extends Mage_Core_Helper_Abstract
 {
