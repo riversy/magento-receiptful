@@ -322,6 +322,23 @@ class Receiptful_Core_Observer_Receipt
         }
 
         /**
+         * Add aheadWorks Points
+         */
+        if (Mage::helper('core')->isModuleEnabled('AW_Points')){
+
+            if  ($amount = (float)$order->getMoneyForPoints()){
+
+                $textForPoints = Mage::helper('points/config')->getPointUnitName();
+                $title = Mage::helper('sales')->__('%s', $textForPoints);
+
+                $data['subtotals'][] = array(
+                    'description' => $title,
+                    'amount' => -$amount,
+                );
+            }
+        }
+
+        /**
          * Add discount
          */
         if (((float)$invoice->getDiscountAmount()) != 0) {
