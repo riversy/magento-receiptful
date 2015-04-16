@@ -148,10 +148,6 @@ class Receiptful_Core_Observer_Receipt
 
         $upsell = $response['upsell'];
 
-        if (!isset($upsell['active']) || !$upsell['active']) {
-            return;
-        }
-
         /** @var Receiptful_Core_Helper_Coupon $couponHelper */
         $couponHelper = Mage::helper('receiptful/coupon');
 
