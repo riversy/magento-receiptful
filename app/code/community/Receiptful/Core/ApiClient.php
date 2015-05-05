@@ -29,7 +29,7 @@ class Receiptful_Core_ApiClient
 
         // If the module has not been configured yet, skip everything
         if (!$apiKey) {
-            throw new Receiptful_Core_Exception_FailedRequestException('401: your api key seems not correct, please check it.');
+            throw new Receiptful_Core_Exception_FailedRequestException(401, '401: your api key seems not correct, please check it.');
         }
 
         $encodedData = json_encode($data);
@@ -57,14 +57,14 @@ class Receiptful_Core_ApiClient
         if (400 === $httpCode) {
             $result = json_decode($result, true);
 
-            throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': ' . implode(', ', $result));
+            throw new Receiptful_Core_Exception_FailedRequestException(400, $httpCode . ': ' . implode(', ', $result));
         }
 
         if (401 === $httpCode) {
-            throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': your api key seems not correct, please check it.');
+            throw new Receiptful_Core_Exception_FailedRequestException(401, $httpCode . ': your api key seems not correct, please check it.');
         }
 
-        throw new Receiptful_Core_Exception_FailedRequestException($httpCode . ': an unexpected exception has occurred.');
+        throw new Receiptful_Core_Exception_FailedRequestException($httpCode, $httpCode . ': an unexpected exception has occurred.');
     }
 
     public static function getBaseUrl()

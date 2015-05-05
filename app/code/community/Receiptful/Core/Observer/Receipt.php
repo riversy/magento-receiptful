@@ -56,7 +56,10 @@ class Receiptful_Core_Observer_Receipt
             );
 
         } catch (Receiptful_Core_Exception_FailedRequestException $e) {
-            $invoice->setReceiptfulReceiptFailedAt(time());
+            // Mark as failed only for 5xx errors
+            if ($e->getStatusCode() >= 500 || $e->getStatusCode() == 401) {
+                $invoice->setReceiptfulReceiptFailedAt(time());
+            }
 
             $order->addStatusToHistory(
                 $order->getStatus(),
