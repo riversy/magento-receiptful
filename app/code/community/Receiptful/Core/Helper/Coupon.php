@@ -72,15 +72,21 @@ class Receiptful_Core_Helper_Coupon extends Mage_Core_Helper_Abstract
             $coupon = Mage::getModel('salesrule/coupon');
             $coupon->loadByCode($couponCode);
 
-            if ($coupon->getId() && $coupon->getExpirationDate()) {
+            if ($coupon->getId()) {
 
-                # Change validity flag if we found the coupon and it can be expired
+                if ($coupon->getExpirationDate()){
 
-                $currentDate = new Zend_Date();
-                $currentDateStr = $currentDate->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+                    # Change validity flag if we found the coupon and it can be expired
 
-                $isValid = ($currentDateStr < $coupon->getExpirationDate());
-                $this->_validations[$couponCode] = $isValid;
+                    $currentDate = new Zend_Date();
+                    $currentDateStr = $currentDate->toString(Varien_Date::DATETIME_INTERNAL_FORMAT);
+
+                    $isValid = ($currentDateStr < $coupon->getExpirationDate());
+                    $this->_validations[$couponCode] = $isValid;
+                } else {
+
+                    $this->_validations[$couponCode] = true;
+                }
             }
         }
 
