@@ -176,9 +176,8 @@ class Receiptful_Core_Observer_Receipt
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getQuote();
 
-        if ($quote && $quote->getCouponCode()){
-
-            $couponCode = $quote->getCouponCode();
+        $couponCode = $quote->getCouponCode();
+        if ($quote && $couponCode){
 
             /** @var Receiptful_Core_Helper_Coupon $couponHelper */
             $couponHelper = Mage::helper('receiptful/coupon');
